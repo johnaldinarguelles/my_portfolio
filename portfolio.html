@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>John Aldin Arguelles — IT Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #00ffc2;
+    --accent2: #7b5ea7;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --card: #13131d;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: left 0.12s ease, top 0.12s ease;
+    opacity: 0.5;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: 1.4rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(16px);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .logo span { color: var(--text); }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+  }
+  nav ul a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  nav ul a:hover { color: var(--accent); }
+
+  .nav-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 0.5rem 1.2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    cursor: none;
+    text-transform: uppercase;
+    transition: opacity 0.2s;
+  }
+  .nav-btn:hover { opacity: 0.8; }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 8rem 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,194,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,194,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(123,94,167,0.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-content { position: relative; z-index: 2; max-width: 900px; }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.9rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    animation: fadeSlideIn 0.8s ease both;
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    animation: fadeSlideIn 0.9s 0.1s ease both;
+  }
+  h1 .line2 { color: var(--accent); }
+  h1 .dim { color: var(--muted); }
+
+  .hero-sub {
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 520px;
+    animation: fadeSlideIn 1s 0.2s ease both;
+  }
+
+  .hero-actions {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 1rem;
+    animation: fadeSlideIn 1s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 0.85rem 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: none;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+    display: inline-block;
+  }
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-2px); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.85rem 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: none;
+    text-decoration: none;
+    transition: border-color 0.2s, transform 0.2s;
+    display: inline-block;
+  }
+  .btn-outline:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  .hero-stats {
+    margin-top: 4rem;
+    display: flex;
+    gap: 3rem;
+    animation: fadeSlideIn 1s 0.4s ease both;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTIONS */
+  section {
+    padding: 6rem 3rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 0.68rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3.5rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .section-header p {
+    max-width: 360px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 1.8;
+  }
+
+  /* SKILLS */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .skill-card {
+    background: var(--card);
+    padding: 2rem;
+    transition: background 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 0;
+    background: var(--accent);
+    transition: height 0.3s ease;
+  }
+  .skill-card:hover::before { height: 100%; }
+  .skill-card:hover { background: #16161f; }
+
+  .skill-icon {
+    width: 40px; height: 40px;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .skill-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+  }
+
+  .skill-card p {
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.2rem;
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .tag.accent { border-color: var(--accent); color: var(--accent); }
+
+  /* PROJECTS */
+  .projects-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); }
+
+  .project-item {
+    background: var(--card);
+    padding: 2.5rem 2.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2.5rem;
+    align-items: center;
+    transition: background 0.2s;
+    cursor: none;
+  }
+  .project-item:hover { background: #15151e; }
+
+  .project-num {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    width: 40px;
+  }
+
+  .project-info h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    transition: color 0.2s;
+  }
+  .project-item:hover .project-info h3 { color: var(--accent); }
+
+  .project-info p {
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 0.8rem;
+  }
+
+  .project-arrow {
+    font-size: 1.4rem;
+    color: var(--muted);
+    transition: color 0.2s, transform 0.2s;
+  }
+  .project-item:hover .project-arrow { color: var(--accent); transform: translateX(4px); }
+
+  /* EXPERIENCE */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 180px 1px 1fr;
+    gap: 2rem;
+    padding-bottom: 3rem;
+    position: relative;
+  }
+
+  .timeline-date {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-align: right;
+    padding-top: 0.2rem;
+    letter-spacing: 0.05em;
+  }
+  .timeline-date strong { display: block; color: var(--text); font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.82rem; }
+
+  .timeline-line {
+    background: var(--border);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .timeline-dot {
+    position: absolute;
+    top: 6px; left: 50%;
+    transform: translateX(-50%);
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  .timeline-content { padding-top: 0; }
+  .timeline-content h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+  .timeline-content .company {
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .timeline-content p {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  /* CONTACT */
+  #contact {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .contact-left h2 { margin-bottom: 1rem; }
+  .contact-left p {
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+
+  .contact-links { display: flex; flex-direction: column; gap: 0.8rem; }
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.2s;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .contact-link:hover { color: var(--accent); }
+  .contact-link-icon { width: 36px; height: 36px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+
+  .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+
+  .form-group label {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.85rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { min-height: 130px; }
+
+  .form-submit {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 0.9rem 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: none;
+    width: 100%;
+    transition: opacity 0.2s;
+  }
+  .form-submit:hover { opacity: 0.85; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  footer p { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.06em; }
+  .footer-accent { color: var(--accent); }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    nav { padding: 1.2rem 1.5rem; }
+    nav ul { display: none; }
+    section { padding: 4rem 1.5rem; }
+    #hero { padding: 7rem 1.5rem 3rem; }
+    .hero-stats { gap: 1.5rem; flex-wrap: wrap; }
+    .project-item { grid-template-columns: 1fr; gap: 1rem; }
+    .project-num { display: none; }
+    .timeline-item { grid-template-columns: 1fr; }
+    .timeline-line { display: none; }
+    .timeline-date { text-align: left; padding-top: 0; }
+    #contact { grid-template-columns: 1fr; }
+    footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">JA.A<span>.</span></a>
+  <ul>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="Arguelles_John_Aldin.pdf" class="nav-btn">Resume ↓</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="status-badge"><span class="status-dot"></span> Open to opportunities</div>
+    <h1>
+      John Aldin<br>
+      <span class="line2">Arguelles</span><br>
+      <span class="dim">IT Software Engineer</span>
+    </h1>
+    <p class="hero-sub">
+      Systems architect and full-stack infrastructure engineer with 6+ years building resilient, scalable networks, cloud environments, and enterprise IT solutions.
+    </p>
+    <div class="hero-actions">
+      <a href="#projects" class="btn-primary">View Work →</a>
+      <a href="#contact" class="btn-outline">Get in Touch</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">6+</div>
+        <div class="stat-label">Years Exp.</div>
+      </div>
+      <div>
+        <div class="stat-num">40+</div>
+        <div class="stat-label">Projects</div>
+      </div>
+      <div>
+        <div class="stat-num">12</div>
+        <div class="stat-label">Certs</div>
+      </div>
+      <div>
+        <div class="stat-num">99.9%</div>
+        <div class="stat-label">Uptime SLA</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-label">// 01 — Expertise</div>
+      <h2>Technical<br>Skills</h2>
+    </div>
+    <p>A broad foundation across infrastructure, cloud, security, and software — with deep focus where it counts.</p>
+  </div>
+<div class="skills-grid reveal">
+  <div class="skill-card">
+    <div class="skill-icon">☁️</div>
+    <h3>Cloud Infrastructure</h3>
+    <p>Designing and maintaining scalable cloud environments with a focus on availability, cost efficiency, and security.</p>
+    <div class="skill-tags">
+      <span class="tag accent">AWS</span>
+    </div>
+  </div>
+
+  <div class="skill-card">
+    <div class="skill-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+        <path d="m384-336 56-57-87-87 87-87-56-57-144 144 144 144Zm192 0 144-144-144-144-56 57 87 87-87 87 56 57ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/>
+      </svg>
+    </div>
+    <h3>Developer/Programmer</h3>
+    <p>Building responsive web applications and dynamic interfaces using modern frontend and backend technologies.</p>
+    <div class="skill-tags">
+      <span class="tag accent">PHP</span>
+      <span class="tag">HTML</span>
+      <span class="tag">CSS</span>
+      <span class="tag">JS</span>
+      <span class="tag">jQuery</span>
+      <span class="tag">Ajax</span>
+      <span class="tag">Bootstrap / Material UI / ShadCN</span>
+    </div>
+  </div>
+
+  <div class="skill-card">
+    <div class="skill-icon">🔐</div>
+    <h3>Cybersecurity</h3>
+    <p>Threat detection, incident response, vulnerability assessments, and compliance framework implementation.</p>
+    <div class="skill-tags">
+      <span class="tag accent">SIEM</span>
+      <span class="tag">End Point Security</span>
+      <span class="tag">Nmap</span>
+      <span class="tag">Kali Linux</span>
+    </div>
+  </div>
+
+  <div class="skill-card">
+    <div class="skill-icon">🖥️</div>
+    <h3>Systems Administration</h3>
+    <p>End-to-end Windows Server and Linux management, Active Directory, and virtualization platforms.</p>
+    <div class="skill-tags">
+      <span class="tag accent">Linux</span>
+      <span class="tag">Windows Server</span>
+      <span class="tag">VMware</span>
+    </div>
+  </div>
+
+  <div class="skill-card">
+    <div class="skill-icon">📋</div>
+    <h3>Project Management</h3>
+    <p>Planning, executing, and delivering IT projects on time and within scope using agile and traditional methodologies.</p>
+    <div class="skill-tags">
+      <span class="tag accent">Agile / Scrum</span>
+      <span class="tag">Teams Planner</span>
+      <span class="tag">MS Project</span>
+      <span class="tag">Potential Risk Management</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-label">// 02 — Work</div>
+      <h2>Featured<br>Projects</h2>
+    </div>
+    <p>Full-stack web systems built from the ground up — covering healthcare, hospitality, logistics, and enterprise operations.</p>
+  </div>
+  <div class="projects-list reveal">
+
+    <div class="project-item">
+      <div class="project-num">01</div>
+      <div class="project-info">
+        <h3>Dermatology Reservation Website</h3>
+        <p>Online appointment and patient reservation system for a dermatology clinic, featuring real-time slot availability, patient record management, and admin dashboard for scheduling control.</p>
+        <div class="skill-tags">
+          <span class="tag">PHP</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">Bootstrap</span>
+          <span class="tag">AJAX</span>
+          <span class="tag">jQuery</span>
+        </div>
+      </div>
+      <div class="project-arrow">→</div>
+    </div>
+
+    <div class="project-item">
+      <div class="project-num">02</div>
+      <div class="project-info">
+        <h3>Resort Reservation Website</h3>
+        <p>End-to-end resort booking platform with room/amenity selection, availability calendar, booking confirmation flow, and a management backend for staff to handle reservations and guest records.</p>
+        <div class="skill-tags">
+          <span class="tag">PHP</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">Bootstrap</span>
+          <span class="tag">AJAX</span>
+          <span class="tag">jQuery</span>
+        </div>
+      </div>
+      <div class="project-arrow">→</div>
+    </div>
+
+    <div class="project-item">
+      <div class="project-num">03</div>
+      <div class="project-info">
+        <h3>Company Portal — Multi-Department Ticketing System</h3>
+        <p>Centralized internal portal supporting multiple departments with dedicated ticketing queues, ticket assignment, status tracking, escalation workflows, and reporting for IT and operations teams.</p>
+        <div class="skill-tags">
+          <span class="tag">PHP</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">Bootstrap</span>
+          <span class="tag">AJAX</span>
+          <span class="tag">jQuery</span>
+          <span class="tag">JS Events</span>
+        </div>
+      </div>
+      <div class="project-arrow">→</div>
+    </div>
+
+    <div class="project-item">
+      <div class="project-num">04</div>
+      <div class="project-info">
+        <h3>Fleet Management System</h3>
+        <p>Vehicle monitoring and management system for tracking fleet assignments, driver scheduling, maintenance logs, and trip history — giving operations teams full visibility over company vehicles.</p>
+        <div class="skill-tags">
+          <span class="tag">PHP</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">Bootstrap</span>
+          <span class="tag">AJAX</span>
+          <span class="tag">jQuery</span>
+        </div>
+      </div>
+      <div class="project-arrow">→</div>
+    </div>
+
+    <div class="project-item">
+      <div class="project-num">05</div>
+      <div class="project-info">
+        <h3>Memo Management System</h3>
+        <p>Internal memo creation and distribution platform allowing department heads to compose, publish, and track acknowledgment of company memos across all organizational levels.</p>
+        <div class="skill-tags">
+          <span class="tag">PHP</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">Bootstrap</span>
+          <span class="tag">AJAX</span>
+          <span class="tag">jQuery</span>
+        </div>
+      </div>
+      <div class="project-arrow">→</div>
+    </div>
+
+    <div class="project-item">
+      <div class="project-num">06</div>
+      <div class="project-info">
+        <h3>Seat Reservation System</h3>
+        <p>Interactive seat selection and booking system with a real-time visual seat map, reservation locking to prevent double-booking, and an admin panel for managing venues and event layouts.</p>
+        <div class="skill-tags">
+          <span class="tag">PHP</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">Bootstrap</span>
+          <span class="tag">AJAX</span>
+          <span class="tag">jQuery</span>
+          <span class="tag">JS Events</span>
+        </div>
+      </div>
+      <div class="project-arrow">→</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-label">// 03 — History</div>
+      <h2>Experience</h2>
+    </div>
+    <p>A track record of delivering infrastructure excellence across fast-moving companies and enterprise environments.</p>
+  </div>
+  <div class="timeline reveal">
+    <div class="timeline-item">
+      <div class="timeline-date">
+        <strong>January 2026 — Present</strong>
+        Full-time
+      </div>
+      <div class="timeline-line"><div class="timeline-dot"></div></div>
+      <div class="timeline-content">
+        <h3>IT - Cybersecurity Analyst</h3>
+        <div class="company">Yamaha Motor Philippines, Inc</div>
+        <p>As a Cybersecurity Analyst, I performed network and application security assessments using tools like Nmap and Burp Suite to identify vulnerabilities and strengthen server security. I contributed to server hardening and secure system configurations while supporting overall cybersecurity operations and infrastructure management. I also built and maintained a Moodle-based cybersecurity LMS platform to support training initiatives. Additionally, I designed and executed phishing simulation campaigns and conducted regular cybersecurity awareness sessions, helping improve employee vigilance and organizational resilience against social engineering threats.</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">
+        <strong>September 2024 — January 2026</strong>
+        Full-time
+      </div>
+      <div class="timeline-line"><div class="timeline-dot"></div></div>
+      <div class="timeline-content">
+        <h3>IT - Software Engineer</h3>
+        <div class="company">Yamaha Motor Philippines, Inc</div>
+        <p>After being hired, I took on a larger role in developing and maintaining scalable web applications, focusing on performance optimization and reducing load times to enhance user experience. I applied secure coding practices to address vulnerabilities and strengthen system security, while working within Agile environments to collaborate with cross-functional teams and deliver features efficiently. I also contributed to designing user-friendly interfaces, assisted in project planning, and supported AWS cloud operations, including EC2 management and deployments. Additionally, I leveraged AI-assisted tools to streamline workflows, improve coding efficiency, and enhance problem-solving.</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">
+        <strong>February 2024 — May 2024</strong>
+        Full-time
+      </div>
+      <div class="timeline-line"><div class="timeline-dot"></div></div>
+      <div class="timeline-content">
+        <h3>IT Intern - Software Developer</h3>
+        <div class="company">Yamaha Motor Philippines</div>
+        <p>During my internship, I contributed to the development and enhancement of company web applications, focusing on building responsive, user-friendly, and high-performing websites. This experience strengthened my skills in modern web development and delivering solutions that improve user experience and overall system efficiency.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section style="border-top: 1px solid var(--border); padding: 6rem 3rem;">
+  <div id="contact">
+    <div class="contact-left reveal">
+      <div class="section-label">// 04 — Connect</div>
+      <h2>Let's Build<br>Something.</h2>
+      <p style="margin-top:1rem;">
+        Open to full-time roles, contract projects, and consulting opportunities. If you have a challenging infrastructure problem, I'd love to hear about it.
+      </p>
+      <div class="contact-links" style="margin-top:2rem;">
+        <a href="mailto:arguellesjohnaldin2@gmail.com" class="contact-link">
+          <span class="contact-link-icon">✉</span>
+          arguellesjohnaldin2@gmail.com
+        </a>
+        <a href="www.linkedin.com/in/john-aldin-arguelles-56427928b" class="contact-link" target="_blank">
+          <span class="contact-link-icon">in</span>
+          linkedin.com/in/john-aldin-arguelles
+        </a>
+        <a href="https://github.com/johnaldinarguelles" class="contact-link" target="_blank">
+          <span class="contact-link-icon">⌥</span>
+          github.com/johnaldinarguelles
+        </a>
+      </div>
+    </div>
+    <div class="contact-form reveal">
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" placeholder="Jane Smith">
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" placeholder="jane@company.com">
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea placeholder="Tell me about your project or opportunity…"></textarea>
+      </div>
+      <button class="form-submit">Send Message →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 <span class="footer-accent">John Aldin Arguelles</span> — IT Portfolio</p>
+  <p>Built with precision. Deployed with care.</p>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    ring.style.left = e.clientX + 'px';
+    ring.style.top = e.clientY + 'px';
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Active nav highlighting
+  const sections = document.querySelectorAll('section[id], div[id]');
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    sections.forEach(s => {
+      const top = s.offsetTop - 120;
+      const bottom = top + s.offsetHeight;
+      const id = s.getAttribute('id');
+      const link = document.querySelector(`nav a[href="#${id}"]`);
+      if (link) link.style.color = scrollY >= top && scrollY < bottom ? 'var(--accent)' : '';
+    });
+  });
+
+  // Smooth project click (placeholder)
+  document.querySelectorAll('.project-item').forEach(item => {
+    item.addEventListener('click', () => {
+      item.style.transform = 'scale(0.99)';
+      setTimeout(() => item.style.transform = '', 150);
+    });
+  });
+</script>
+</body>
+</html>
