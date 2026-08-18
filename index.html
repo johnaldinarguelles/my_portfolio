@@ -21,6 +21,11 @@
 
   html { scroll-behavior: smooth; }
 
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
   body {
     background: var(--bg);
     color: var(--text);
@@ -30,28 +35,44 @@
     cursor: none;
   }
 
-  /* Custom cursor */
-  .cursor {
-    position: fixed;
-    width: 10px; height: 10px;
-    background: var(--accent);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: transform 0.1s ease;
-    mix-blend-mode: difference;
+  /* Custom cursor — desktop pointer devices only */
+  .cursor, .cursor-ring { display: none; }
+  @media (hover: hover) and (pointer: fine) {
+    body { cursor: none; }
+    .cursor {
+      display: block;
+      position: fixed;
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease;
+      mix-blend-mode: difference;
+    }
+    .cursor-ring {
+      display: block;
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: left 0.12s ease, top 0.12s ease;
+      opacity: 0.5;
+    }
   }
-  .cursor-ring {
-    position: fixed;
-    width: 36px; height: 36px;
-    border: 1px solid var(--accent);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    transform: translate(-50%, -50%);
-    transition: left 0.12s ease, top 0.12s ease;
-    opacity: 0.5;
+  @media (hover: none), (pointer: coarse) {
+    body { cursor: auto; }
+    a, button, input, textarea { cursor: pointer; }
+  }
+
+  /* Visible keyboard focus */
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
   }
 
   /* Noise overlay */
@@ -102,7 +123,7 @@
     text-transform: uppercase;
     transition: color 0.2s;
   }
-  nav ul a:hover { color: var(--accent); }
+  nav ul a:hover, nav ul a.active { color: var(--accent); }
 
   .nav-btn {
     background: var(--accent);
@@ -112,22 +133,22 @@
     font-family: 'DM Mono', monospace;
     font-size: 0.72rem;
     letter-spacing: 0.1em;
-    cursor: none;
     text-transform: uppercase;
+    text-decoration: none;
     transition: opacity 0.2s;
   }
   .nav-btn:hover { opacity: 0.8; }
 
   /* HERO */
-#hero {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;   /* add this */
-  padding: 8rem 3rem 4rem;
-  position: relative;
-  overflow: hidden;
-}
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8rem 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
 
   .hero-grid {
     position: absolute;
@@ -149,11 +170,21 @@
     pointer-events: none;
   }
 
- .hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: unset;   /* override the old 900px limit */
-}
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
 
   .status-badge {
     display: inline-flex;
@@ -203,6 +234,7 @@
     margin-top: 2.5rem;
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap;
     animation: fadeSlideIn 1s 0.3s ease both;
   }
 
@@ -215,7 +247,6 @@
     font-size: 0.78rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    cursor: none;
     text-decoration: none;
     transition: opacity 0.2s, transform 0.2s;
     display: inline-block;
@@ -231,7 +262,6 @@
     font-size: 0.78rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    cursor: none;
     text-decoration: none;
     transition: border-color 0.2s, transform 0.2s;
     display: inline-block;
@@ -242,6 +272,7 @@
     margin-top: 4rem;
     display: flex;
     gap: 3rem;
+    flex-wrap: wrap;
     animation: fadeSlideIn 1s 0.4s ease both;
   }
   .stat-num {
@@ -375,7 +406,6 @@
     gap: 2.5rem;
     align-items: center;
     transition: background 0.2s;
-    cursor: none;
   }
   .project-item:hover { background: #15151e; }
 
@@ -403,13 +433,6 @@
     line-height: 1.7;
     margin-bottom: 0.8rem;
   }
-
-  .project-arrow {
-    font-size: 1.4rem;
-    color: var(--muted);
-    transition: color 0.2s, transform 0.2s;
-  }
-  .project-item:hover .project-arrow { color: var(--accent); transform: translateX(4px); }
 
   /* EXPERIENCE */
   .timeline { display: flex; flex-direction: column; gap: 0; }
@@ -467,22 +490,19 @@
   }
 
   /* CONTACT */
-  #contact {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: start;
+  .contact-inner {
+    max-width: 640px;
   }
-
-  .contact-left h2 { margin-bottom: 1rem; }
-  .contact-left p {
+  .contact-inner h2 { margin-bottom: 1rem; }
+  .contact-inner p.lead {
     color: var(--muted);
     font-size: 0.82rem;
     line-height: 1.8;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    max-width: 480px;
   }
 
-  .contact-links { display: flex; flex-direction: column; gap: 0.8rem; }
+  .contact-links { display: flex; flex-direction: column; gap: 0.8rem; max-width: 480px; }
   .contact-link {
     display: flex;
     align-items: center;
@@ -495,50 +515,7 @@
     border-bottom: 1px solid var(--border);
   }
   .contact-link:hover { color: var(--accent); }
-  .contact-link-icon { width: 36px; height: 36px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
-
-  .contact-form { display: flex; flex-direction: column; gap: 1rem; }
-
-  .form-group label {
-    display: block;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.4rem;
-  }
-
-  .form-group input,
-  .form-group textarea {
-    width: 100%;
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 0.85rem 1rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    outline: none;
-    transition: border-color 0.2s;
-    resize: none;
-  }
-  .form-group input:focus,
-  .form-group textarea:focus { border-color: var(--accent); }
-  .form-group textarea { min-height: 130px; }
-
-  .form-submit {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    padding: 0.9rem 2rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: none;
-    width: 100%;
-    transition: opacity 0.2s;
-  }
-  .form-submit:hover { opacity: 0.85; }
+  .contact-link-icon { width: 36px; height: 36px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; }
 
   /* FOOTER */
   footer {
@@ -569,24 +546,16 @@
     nav { padding: 1.2rem 1.5rem; }
     nav ul { display: none; }
     section { padding: 4rem 1.5rem; }
-    /*#hero { padding: 7rem 1.5rem 3rem; }*/
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-photo { order: -1; justify-content: flex-start !important; }
     .hero-stats { gap: 1.5rem; flex-wrap: wrap; }
     .project-item { grid-template-columns: 1fr; gap: 1rem; }
     .project-num { display: none; }
     .timeline-item { grid-template-columns: 1fr; }
     .timeline-line { display: none; }
     .timeline-date { text-align: left; padding-top: 0; }
-    #contact { grid-template-columns: 1fr; }
     footer { flex-direction: column; align-items: flex-start; }
   }
-@media (max-width: 768px) {
-  #hero > div[style] {
-    grid-template-columns: 1fr !important;
-  }
-  #hero > div[style] > div:last-child {
-    justify-content: flex-start !important;
-  }
-}
 </style>
 </head>
 <body>
@@ -611,7 +580,7 @@
   <div class="hero-grid"></div>
   <div class="hero-glow"></div>
 
-  <div style="position: relative; z-index: 2; width: 100%; max-width: 1100px; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+  <div class="hero-inner">
 
     <!-- LEFT: Text -->
     <div class="hero-content">
@@ -622,19 +591,33 @@
         <span class="dim">IT</span>
       </h1>
       <p class="hero-sub">
-        IT professional with proven expertise in cybersecurity and full-stack development. Currently a Cybersecurity Analyst at Yamaha Motor Philippines with experience in penetration testing, security awareness training, and infrastructure hardening. I combine strong technical foundations in web development (PHP, JavaScript, AWS) with advanced security practices including threat assessment, vulnerability management, and secure coding. Cum Laude graduate from STI College with a thesis on Online Dermatology Reservation System. Passionate about protecting digital infrastructure while building robust, scalable solutions.
+        Cybersecurity Analyst and Software Engineer with experience across cybersecurity operations, web application development, system automation, and infrastructure support. Currently securing systems at Yamaha Motor Philippines — running vulnerability assessments, hardening servers, and running phishing simulations — after two years building the company's internal web applications. Cum Laude graduate of STI College. I combine hands-on security practice with full-stack development to build and protect systems end to end.
       </p>
       <div class="hero-actions">
         <a href="#projects" class="btn-primary">View Work →</a>
         <a href="#contact" class="btn-outline">Get in Touch</a>
       </div>
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">2+</div>
+          <div class="stat-label">Years in Industry</div>
+        </div>
+        <div>
+          <div class="stat-num">6</div>
+          <div class="stat-label">Systems Shipped</div>
+        </div>
+        <div>
+          <div class="stat-num">4</div>
+          <div class="stat-label">Roles at Yamaha</div>
+        </div>
+      </div>
     </div>
 
     <!-- RIGHT: Photo -->
-    <div style="display: flex; justify-content: center; align-items: center;">
+    <div class="hero-photo" style="display: flex; justify-content: center; align-items: center;">
       <div style="position: relative;">
         <div style="width: 300px; height: 370px; border: 1px solid var(--border); overflow: hidden; background: var(--card);">
-          <img src="assets/images/profile.jpg" alt="John Aldin Arguelles"
+          <img src="assets/images/profile.jpg" alt="Portrait of John Aldin Arguelles"
             style="width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block;">
         </div>
         <!-- Accent corner brackets -->
@@ -658,70 +641,76 @@
     </div>
     <p>A broad foundation across infrastructure, cloud, security, and software — with deep focus where it counts.</p>
   </div>
-<div class="skills-grid reveal">
-  <div class="skill-card">
-    <div class="skill-icon">☁️</div>
-    <h3>Cloud Infrastructure</h3>
-    <p>Designing and maintaining scalable cloud environments with a focus on availability, cost efficiency, and security.</p>
-    <div class="skill-tags">
-      <span class="tag accent">AWS</span>
-    </div>
-  </div>
+  <div class="skills-grid reveal">
 
-  <div class="skill-card">
-    <div class="skill-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
-        <path d="m384-336 56-57-87-87 87-87-56-57-144 144 144 144Zm192 0 144-144-144-144-56 57 87 87-87 87 56 57ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/>
-      </svg>
+    <div class="skill-card">
+      <div class="skill-icon">🔐</div>
+      <h3>Cybersecurity</h3>
+      <p>Vulnerability scanning, phishing simulation, and security awareness training as part of ongoing analyst work.</p>
+      <div class="skill-tags">
+        <span class="tag accent">Nmap</span>
+        <span class="tag accent">Burp Suite</span>
+        <span class="tag">Kali Linux</span>
+        <span class="tag">Vulnerability Scanning</span>
+        <span class="tag">Phishing Simulation</span>
+      </div>
     </div>
-    <h3>Developer/Programmer</h3>
-    <p>Building responsive web applications and dynamic interfaces using modern frontend and backend technologies.</p>
-    <div class="skill-tags">
-      <span class="tag accent">PHP</span>
-      <span class="tag">HTML</span>
-      <span class="tag">CSS</span>
-      <span class="tag">JS</span>
-      <span class="tag">jQuery</span>
-      <span class="tag">Ajax</span>
-      <span class="tag">Bootstrap / Material UI / ShadCN</span>
-    </div>
-  </div>
 
-  <div class="skill-card">
-    <div class="skill-icon">🔐</div>
-    <h3>Cybersecurity</h3>
-    <p>Threat detection, incident response, vulnerability assessments, and compliance framework implementation.</p>
-    <div class="skill-tags">
-      <span class="tag accent">SIEM</span>
-      <span class="tag">End Point Security</span>
-      <span class="tag">Nmap</span>
-      <span class="tag">Kali Linux</span>
+    <div class="skill-card">
+      <div class="skill-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8e8f0">
+          <path d="m384-336 56-57-87-87 87-87-56-57-144 144 144 144Zm192 0 144-144-144-144-56 57 87 87-87 87 56 57ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/>
+        </svg>
+      </div>
+      <h3>Web Development</h3>
+      <p>Building and maintaining internal business applications and client sites, from database to interface.</p>
+      <div class="skill-tags">
+        <span class="tag accent">PHP</span>
+        <span class="tag">JavaScript</span>
+        <span class="tag">MySQL</span>
+        <span class="tag">WordPress</span>
+        <span class="tag">Bootstrap</span>
+        <span class="tag">AJAX / jQuery</span>
+      </div>
     </div>
-  </div>
 
-  <div class="skill-card">
-    <div class="skill-icon">🖥️</div>
-    <h3>Systems Administration</h3>
-    <p>End-to-end Windows Server and Linux management, Active Directory, and virtualization platforms.</p>
-    <div class="skill-tags">
-      <span class="tag accent">Linux</span>
-      <span class="tag">Windows Server</span>
-      <span class="tag">VMware</span>
+    <div class="skill-card">
+      <div class="skill-icon">⚙️</div>
+      <h3>Automation &amp; Integration</h3>
+      <p>Connecting forms, APIs, and platforms into automated document, data, and file-processing workflows.</p>
+      <div class="skill-tags">
+        <span class="tag accent">Make.com</span>
+        <span class="tag">REST APIs</span>
+        <span class="tag">Webhooks</span>
+      </div>
     </div>
-  </div>
 
-  <div class="skill-card">
-    <div class="skill-icon">📋</div>
-    <h3>Project Management</h3>
-    <p>Planning, executing, and delivering IT projects on time and within scope using agile and traditional methodologies.</p>
-    <div class="skill-tags">
-      <span class="tag accent">Agile / Scrum</span>
-      <span class="tag">Teams Planner</span>
-      <span class="tag">MS Project</span>
-      <span class="tag">Potential Risk Management</span>
+    <div class="skill-card">
+      <div class="skill-icon">☁️</div>
+      <h3>Cloud &amp; Infrastructure</h3>
+      <p>Deploying and administering cloud and on-prem infrastructure with a focus on security and uptime.</p>
+      <div class="skill-tags">
+        <span class="tag accent">AWS / EC2</span>
+        <span class="tag">Linux</span>
+        <span class="tag">Ubuntu</span>
+        <span class="tag">Windows</span>
+      </div>
     </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🛠️</div>
+      <h3>Tools &amp; Platforms</h3>
+      <p>The day-to-day toolkit for development, training delivery, and virtualized environments.</p>
+      <div class="skill-tags">
+        <span class="tag accent">Git</span>
+        <span class="tag">VS Code</span>
+        <span class="tag">VMware</span>
+        <span class="tag">Moodle</span>
+        <span class="tag">Power Apps</span>
+      </div>
+    </div>
+
   </div>
-</div>
 </section>
 
 <!-- PROJECTS -->
@@ -739,7 +728,7 @@
       <div class="project-num">01</div>
       <div class="project-info">
         <h3>Dermatology Reservation Website</h3>
-        <p>Online appointment and patient reservation system for a dermatology clinic, featuring real-time slot availability, patient record management, and admin dashboard for scheduling control.</p>
+        <p>Online appointment and patient reservation system for a dermatology clinic, featuring real-time slot availability, patient record management, and admin dashboard for scheduling control. Built as a capstone thesis project.</p>
         <div class="skill-tags">
           <span class="tag">PHP</span>
           <span class="tag">MySQL</span>
@@ -748,7 +737,6 @@
           <span class="tag">jQuery</span>
         </div>
       </div>
-      <!-- <div class="project-arrow">→</div> -->
     </div>
 
     <div class="project-item">
@@ -764,7 +752,6 @@
           <span class="tag">jQuery</span>
         </div>
       </div>
-      <!-- <div class="project-arrow">→</div> -->
     </div>
 
     <div class="project-item">
@@ -781,7 +768,6 @@
           <span class="tag">JS Events</span>
         </div>
       </div>
-      <!-- <div class="project-arrow">→</div> -->
     </div>
 
     <div class="project-item">
@@ -797,7 +783,6 @@
           <span class="tag">jQuery</span>
         </div>
       </div>
-      <!-- <div class="project-arrow">→</div> -->
     </div>
 
     <div class="project-item">
@@ -813,7 +798,6 @@
           <span class="tag">jQuery</span>
         </div>
       </div>
-      <!-- <div class="project-arrow">→</div> -->
     </div>
 
     <div class="project-item">
@@ -830,7 +814,6 @@
           <span class="tag">JS Events</span>
         </div>
       </div>
-      <!-- <div class="project-arrow">→</div> -->
     </div>
 
   </div>
@@ -843,86 +826,90 @@
       <div class="section-label">// 03 — History</div>
       <h2>Experience</h2>
     </div>
-    <p>A track record of delivering infrastructure excellence across fast-moving companies and enterprise environments.</p>
+    <p>A track record of delivering security and engineering work across a fast-moving manufacturing enterprise, plus freelance systems work on the side.</p>
   </div>
   <div class="timeline reveal">
+
     <div class="timeline-item">
       <div class="timeline-date">
-        <strong>January 2026 — Present</strong>
+        <strong>Jan 2026 — Present</strong>
         Full-time
       </div>
       <div class="timeline-line"><div class="timeline-dot"></div></div>
       <div class="timeline-content">
-        <h3>IT - Cybersecurity Analyst</h3>
-        <div class="company">Yamaha Motor Philippines, Inc</div>
-        <p>As a Cybersecurity Analyst, I performed network and application security assessments using tools like Nmap and Burp Suite to identify vulnerabilities and strengthen server security. I contributed to server hardening and secure system configurations while supporting overall cybersecurity operations and infrastructure management. I also built and maintained a Moodle-based cybersecurity LMS platform to support training initiatives. Additionally, I designed and executed phishing simulation campaigns and conducted regular cybersecurity awareness sessions, helping improve employee vigilance and organizational resilience against social engineering threats.</p>
+        <h3>Cybersecurity Analyst</h3>
+        <div class="company">Yamaha Motor Philippines, Inc — LIMA Technology Center</div>
+        <p>Run network and application security assessments with Nmap and Burp Suite to identify vulnerabilities and strengthen server security. Contribute to server hardening and secure configuration while supporting broader cybersecurity operations and infrastructure management. Built and maintain a Moodle-based cybersecurity LMS for training initiatives, and design and execute phishing simulation campaigns and awareness sessions to improve employee vigilance against social engineering.</p>
       </div>
     </div>
+
     <div class="timeline-item">
       <div class="timeline-date">
-        <strong>September 2024 — January 2026</strong>
+        <strong>2026 — Present</strong>
+        Freelance
+      </div>
+      <div class="timeline-line"><div class="timeline-dot"></div></div>
+      <div class="timeline-content">
+        <h3>WordPress Developer &amp; Make.com Automation Specialist</h3>
+        <div class="company">Freelance / Project-Based</div>
+        <p>Develop and customize WordPress sites and business portals for clients, and build Make.com workflows that connect WordPress, forms, APIs, and databases. Integrate third-party APIs to automate file uploads, document processing, and data sync — including automated document/PDF workflows with Clinked — and troubleshoot API requests, webhooks, and data mapping across connected platforms.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-date">
+        <strong>Sept 2024 — Jan 2026</strong>
         Full-time
       </div>
       <div class="timeline-line"><div class="timeline-dot"></div></div>
       <div class="timeline-content">
-        <h3>IT - Software Engineer</h3>
-        <div class="company">Yamaha Motor Philippines, Inc</div>
-        <p>After being hired, I took on a larger role in developing and maintaining scalable web applications, focusing on performance optimization and reducing load times to enhance user experience. I applied secure coding practices to address vulnerabilities and strengthen system security, while working within Agile environments to collaborate with cross-functional teams and deliver features efficiently. I also contributed to designing user-friendly interfaces, assisted in project planning, and supported AWS cloud operations, including EC2 management and deployments. Additionally, I leveraged AI-assisted tools to streamline workflows, improve coding efficiency, and enhance problem-solving.</p>
+        <h3>Software Engineer</h3>
+        <div class="company">Yamaha Motor Philippines, Inc — LIMA Technology Center</div>
+        <p>Developed and maintained scalable web applications, focusing on performance optimization and reduced load times. Applied secure coding practices to address vulnerabilities, and worked within Agile teams to deliver features efficiently. Designed user-friendly interfaces, supported AWS operations including EC2 management and deployments, and used AI-assisted tools to streamline development workflows.</p>
       </div>
     </div>
+
     <div class="timeline-item">
       <div class="timeline-date">
-        <strong>February 2024 — May 2024</strong>
-        Full-time
+        <strong>Feb 2024 — May 2024</strong>
+        Internship
       </div>
       <div class="timeline-line"><div class="timeline-dot"></div></div>
       <div class="timeline-content">
-        <h3>IT Intern - Software Developer</h3>
-        <div class="company">Yamaha Motor Philippines</div>
-        <p>During my internship, I contributed to the development and enhancement of company web applications, focusing on building responsive, user-friendly, and high-performing websites. This experience strengthened my skills in modern web development and delivering solutions that improve user experience and overall system efficiency.</p>
+        <h3>Software Engineer Intern</h3>
+        <div class="company">Yamaha Motor Philippines — LIMA Technology Center</div>
+        <p>Developed system features using PHP, JavaScript, HTML5, CSS, and Bootstrap. Wrote maintainable, documented code following team standards, and participated in code reviews with senior developers to improve implementation quality.</p>
       </div>
     </div>
+
   </div>
 </section>
 
 <!-- CONTACT -->
-<section style="border-top: 1px solid var(--border); padding: 6rem 3rem;">
-  <div id="contact">
-    <div class="contact-left reveal">
-      <div class="section-label">// 04 — Connect</div>
-      <h2>Let's Build<br>Something.</h2>
-      <p style="margin-top:1rem;">
-        Open to full-time roles, contract projects, and consulting opportunities. If you have a challenging system problem, I'd love to hear about it.
-      </p>
-      <div class="contact-links" style="margin-top:2rem;">
-        <a href="mailto:arguellesjohnaldin2@gmail.com" class="contact-link">
-          <span class="contact-link-icon">✉</span>
-          arguellesjohnaldin2@gmail.com
-        </a>
-        <a href="www.linkedin.com/in/john-aldin-arguelles-56427928b" class="contact-link" target="_blank">
-          <span class="contact-link-icon">in</span>
-          linkedin.com/in/john-aldin-arguelles
-        </a>
-        <a href="https://github.com/johnaldinarguelles" class="contact-link" target="_blank">
-          <span class="contact-link-icon">⌥</span>
-          github.com/johnaldinarguelles
-        </a>
-      </div>
-    </div>
-    <div class="contact-form reveal" style="display:none;">
-      <div class="form-group">
-        <label>Your Name</label>
-        <input type="text" placeholder="Jane Smith">
-      </div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" placeholder="jane@company.com">
-      </div>
-      <div class="form-group">
-        <label>Message</label>
-        <textarea placeholder="Tell me about your project or opportunity…"></textarea>
-      </div>
-      <button class="form-submit">Send Message →</button>
+<section id="contact" style="border-top: 1px solid var(--border); padding: 6rem 3rem;">
+  <div class="contact-inner reveal">
+    <div class="section-label">// 04 — Connect</div>
+    <h2>Let's Build<br>Something.</h2>
+    <p class="lead">
+      Open to full-time roles, contract projects, and consulting opportunities. If you have a challenging system problem, I'd love to hear about it.
+    </p>
+    <div class="contact-links">
+      <a href="mailto:arguellesjohnaldin2@gmail.com" class="contact-link">
+        <span class="contact-link-icon">✉</span>
+        arguellesjohnaldin2@gmail.com
+      </a>
+      <a href="tel:+639672562065" class="contact-link">
+        <span class="contact-link-icon">☎</span>
+        +63 967 256 2065
+      </a>
+      <a href="https://www.linkedin.com/in/john-aldin-arguelles-56427928b" class="contact-link" target="_blank" rel="noopener">
+        <span class="contact-link-icon">in</span>
+        linkedin.com/in/john-aldin-arguelles
+      </a>
+      <a href="https://github.com/johnaldinarguelles" class="contact-link" target="_blank" rel="noopener">
+        <span class="contact-link-icon">⌥</span>
+        github.com/johnaldinarguelles
+      </a>
     </div>
   </div>
 </section>
@@ -930,19 +917,21 @@
 <!-- FOOTER -->
 <footer>
   <p>© 2026 <span class="footer-accent">John Aldin Arguelles</span> — IT Portfolio</p>
-  <p>Built with precision. Deployed with care.</p>
+  <p>Santo Tomas, Batangas, Philippines</p>
 </footer>
 
 <script>
-  // Custom cursor
-  const cursor = document.getElementById('cursor');
-  const ring = document.getElementById('cursorRing');
-  document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-    ring.style.left = e.clientX + 'px';
-    ring.style.top = e.clientY + 'px';
-  });
+  // Custom cursor (desktop pointer devices only)
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+      ring.style.left = e.clientX + 'px';
+      ring.style.top = e.clientY + 'px';
+    });
+  }
 
   // Scroll reveal
   const reveals = document.querySelectorAll('.reveal');
@@ -950,13 +939,14 @@
     entries.forEach((entry, i) => {
       if (entry.isIntersecting) {
         setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
       }
     });
   }, { threshold: 0.1 });
   reveals.forEach(el => observer.observe(el));
 
   // Active nav highlighting
-  const sections = document.querySelectorAll('section[id], div[id]');
+  const sections = document.querySelectorAll('section[id]');
   window.addEventListener('scroll', () => {
     const scrollY = window.scrollY;
     sections.forEach(s => {
@@ -964,15 +954,7 @@
       const bottom = top + s.offsetHeight;
       const id = s.getAttribute('id');
       const link = document.querySelector(`nav a[href="#${id}"]`);
-      if (link) link.style.color = scrollY >= top && scrollY < bottom ? 'var(--accent)' : '';
-    });
-  });
-
-  // Smooth project click (placeholder)
-  document.querySelectorAll('.project-item').forEach(item => {
-    item.addEventListener('click', () => {
-      item.style.transform = 'scale(0.99)';
-      setTimeout(() => item.style.transform = '', 150);
+      if (link) link.classList.toggle('active', scrollY >= top && scrollY < bottom);
     });
   });
 </script>
